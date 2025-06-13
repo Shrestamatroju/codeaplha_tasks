@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login - MyShop</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body class="auth-page">
+
+  <div class="auth-container">
+    <h2>Login</h2>
+    <form id="login-form">
+      <input type="email" id="email" placeholder="Email" required />
+      <input type="password" placeholder="Password" required />
+      <button type="submit">Login</button>
+      <p>Don't have an account? <a href="signup.html">Sign Up</a></p>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById('login-form').addEventListener('submit', e => {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      if (!email) return alert('Please enter email');
+
+      // Fake login: store user in localStorage
+      const user = { id: email, email };
+      localStorage.setItem('myshopUser', JSON.stringify(user));
+
+      alert('Login successful!');
+      window.location.href = '../index.html';
+    });
+  </script>
+  <script src="../script.js"></script>
+</body>
+</html>
+

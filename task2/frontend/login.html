@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login - MySocial</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="auth-container">
+    <h2>Login to MySocial</h2>
+    <form id="loginForm">
+      <input type="text" id="username" placeholder="Enter your username" required />
+
+      <input type="password" id="password" placeholder="Enter your password"  required />
+
+
+      <button type="submit">Login</button>
+    </form>
+    <p>Don't have an account? <a href="signup.html">Sign up here</a></p>
+  </main>
+
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value;
+
+      // Simple validation
+      if (!username || !password) {
+        alert("Please fill in all fields.");
+        return;
+      }
+
+      try {
+        // Call your backend login API
+        const res = await fetch("http://localhost:5000/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password }),
+        });
+
+        if (!res.ok) throw new Error("Invalid username or password");
+
+        const user = await res.json();
+
+        // Save user info to localStorage to mark logged-in session
+        localStorage.setItem("user", JSON.stringify(user));
+
+        // Redirect to feed page
+        window.location.href = "index.html";
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cart - MyShop</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+
+  <header class="navbar">
+    <div class="logo">MyShop</div>
+    <nav>
+      <ul class="nav-links">
+        <li><a href="../index.html">Shop</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="cart-page">
+    <h2>Your Cart</h2>
+    <div id="cart-items"></div>
+    <div class="cart-summary">
+      <p>Total: ₹<span id="cart-total">0</span></p>
+      <button id="checkout-btn">Checkout</button>
+   
+
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2025 MyShop. All rights reserved.
+  </footer>
+
+  <script>
+    const user = JSON.parse(localStorage.getItem('myshopUser'));
+    const cartItemsDiv = document.getElementById('cart-items');
+    const cartTotal = document.getElementById('cart-total');
+    const summarySection = document.querySelector('.cart-summary');
+
+    let cartData = [];
+
+    async function loadCart() {
+      if (!user) {
+        cartItemsDiv.innerHTML = '<p>Please login to view your cart.</p>';
+        summarySection.style.display = 'none';
+        return;
+      }
+
+      try {
+        const res = await fetch(`http://localhost:5000/api/cart/${encodeURIComponent(user.id)}`);
+        cartData = await res.json();
+        updateCart();
+      } catch (err) {
+        cartItemsDiv.innerHTML = '<p>Error loading cart.</p>';
+        console.error(err);
+      }
+    }
+
+    function updateCart() {
+      cartItemsDiv.innerHTML = '';
+      let total = 0;
+
+      if (cartData.length === 0) {
+        cartItemsDiv.innerHTML = '<p>Your cart is empty.</p>';
+        summarySection.style.display = 'none';
+        return;
+      }
+
+      summarySection.style.display = 'block';
+
+      cartData.forEach((item, index) => {
+        total += item.price * item.qty;
+        const div = document.createElement('div');
+        div.className = 'cart-item';
+        div.innerHTML = `
+          <img src="../${item.image}" />
+          <div>
+            <h3>${item.name}</h3>
+            <p>₹${item.price}</p>
+            <input type="number" min="1" value="${item.qty}" data-index="${index}" />
+            <button onclick="removeItem(${index})">Remove</button>
+          </div>
+        `;
+        cartItemsDiv.appendChild(div);
+      });
+
+      cartTotal.textContent = total;
+    }
+
+    function removeItem(index) {
+      const item = cartData[index];
+      fetch(`http://localhost:5000/api/cart/remove`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, productId: item.productId })
+      })
+      .then(() => {
+        cartData.splice(index, 1);
+        updateCart();
+      })
+      .catch((err) => console.error('Remove error:', err));
+    }
+
+    cartItemsDiv.addEventListener('input', (e) => {
+      if (e.target.tagName === 'INPUT') {
+        const i = e.target.dataset.index;
+        cartData[i].qty = parseInt(e.target.value) || 1;
+
+        fetch(`http://localhost:5000/api/cart/update`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: user.id,
+            productId: cartData[i].productId,
+            qty: cartData[i].qty
+          })
+        }).catch((err) => console.error('Update qty error:', err));
+
+        updateCart();
+      }
+    });
+
+   // document.getElementById('checkout-btn').addEventListener('click', () => {
+     // window.location.href = "checkout.html";
+    //});
+    
+//it is working fine but for checkout tod isplay first i am repacin gthis 
+document.getElementById('checkout-btn').addEventListener('click', () => {
+  if (!user || cartData.length === 0) {
+    alert("Your cart is empty!");
+    window.location.href = "../index.html";
+    return;
+  }
+
+  // Save cart data to localStorage for checkout.html to use
+  localStorage.setItem('cart', JSON.stringify(cartData));
+
+  // Redirect to checkout page to fill details
+  window.location.href = "checkout.html";
+});
+
+
+    loadCart();
+  </script>
+  <script src="../script.js"></script>
+
+</body>
+</html>

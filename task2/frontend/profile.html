@@ -1,0 +1,47 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My Profile - MySocial</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div class="logo">MySocial</div>
+    <nav>
+      <a href="feed.html">Feed</a>
+      <a href="profile.html">Profile</a>
+      <a href="#" id="logoutBtn">Logout</a>
+    </nav>
+  </header>
+
+  <main id="profilePage">
+    <section class="profile-header" id="profileHeader">
+      <!-- Will be filled by loadUserProfile(userId) -->
+    </section>
+
+    <section id="userPosts">
+      <h3>User Posts</h3>
+      <!-- User's posts will appear here -->
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+  <script>
+    const loggedInUser = JSON.parse(localStorage.getItem("user"));
+    if (!loggedInUser) window.location.href = "login.html";
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get("userId") || loggedInUser._id;
+
+    loadUserProfile(userId); // This is defined in script.js
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      localStorage.removeItem("user");
+      window.location.href = "login.html";
+    });
+  </script>
+ 
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Checkout - MyShop</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+
+  <header class="navbar">
+    <div class="logo">MyShop</div>
+    <nav>
+      <ul class="nav-links">
+        <li><a href="../index.html">Shop</a></li>
+        <li><a href="cart.html">Cart</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="checkout-page">
+    <h2>Checkout</h2>
+    <form id="checkout-form">
+      <input type="text" placeholder="Full Name" required />
+      <input type="text" placeholder="Address" required />
+      <input type="text" placeholder="City" required />
+      <input type="text" placeholder="State" required />
+      <input type="text" placeholder="Postal Code" required />
+      <input type="tel" placeholder="Phone Number" required />
+      <div class="checkout-summary">
+        <p>Total to Pay: ₹<span id="checkout-total">0</span></p>
+        <button type="submit">Place Order</button>
+      </div>
+    </form>
+  </main>
+
+  <footer>
+    &copy; 2025 MyShop. All rights reserved.
+  </footer>
+
+<script>
+window.onload = function() {
+  const totalSpan = document.getElementById('checkout-total');
+  const cartData = JSON.parse(localStorage.getItem('cart')) || [];
+
+  if (cartData.length === 0) {
+    alert("Your cart is empty. Redirecting to shop.");
+    window.location.href = "../index.html";
+  }
+
+  const totalAmount = cartData.reduce((sum, item) => sum + item.price * item.qty, 0);
+  totalSpan.textContent = totalAmount;
+
+  document.getElementById('checkout-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    // Collect shipping info from inputs
+    const form = e.target;
+    const shippingData = {
+      fullName: form.querySelector('input[placeholder="Full Name"]').value.trim(),
+      address: form.querySelector('input[placeholder="Address"]').value.trim(),
+      city: form.querySelector('input[placeholder="City"]').value.trim(),
+      state: form.querySelector('input[placeholder="State"]').value.trim(),
+      postalCode: form.querySelector('input[placeholder="Postal Code"]').value.trim(),
+      phone: form.querySelector('input[placeholder="Phone Number"]').value.trim(),
+    };
+
+    for (const key in shippingData) {
+      if (!shippingData[key]) {
+        alert(`Please fill in ${key}`);
+        return;
+      }
+    }
+
+    // Get logged-in user info
+    const user = JSON.parse(localStorage.getItem('myshopUser'));
+    if (!user) {
+      alert("Please login to place order.");
+      window.location.href = "login.html";
+      return;
+    }
+
+    const orderData = {
+      userId: user.id,
+      items: cartData.map(item => ({
+        productId: item.productId,
+        name: item.name,
+        price: item.price,
+        qty: item.qty,
+        image: item.image
+      })),
+      totalPrice: totalAmount,
+      shipping: shippingData
+    };
+
+    try {
+      const res = await fetch("http://localhost:5000/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderData)
+      });
+
+      if (!res.ok) throw new Error("Failed to place order");
+
+      // Clear cart on backend
+      await fetch(`http://localhost:5000/api/cart/clear/${encodeURIComponent(user.id)}`, {
+        method: "DELETE"
+      });
+
+      alert("Order placed successfully!");
+      localStorage.removeItem('cart');
+      localStorage.setItem('cartCount', '0');
+      window.location.href = "order.html";
+
+    } catch (err) {
+      alert("Error placing order: " + err.message);
+      console.error(err);
+    }
+  });
+};
+</script>
+
+</body>
+</html>
+
+

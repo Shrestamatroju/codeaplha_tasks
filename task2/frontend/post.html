@@ -1,0 +1,112 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Create Post - MySocial</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div class="logo">MySocial</div>
+    <nav id="navbar"></nav>
+  </header>
+
+  <main>
+    <form id="postForm" class="post-form">
+      <h2>Create a Post</h2>
+      <input type="file" id="imageInput" accept="image/*" required />
+      <input type="text" id="captionInput" placeholder="Write a caption (optional)" maxlength="200" />
+      <button type="submit">Post</button>
+      <div class="message" id="message"></div>
+    </form>
+  </main>
+
+  <script>
+    const navbar = document.getElementById("navbar");
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    if (!user) {
+      alert("You must be logged in to create a post.");
+      window.location.href = "login.html";
+    } else {
+      navbar.innerHTML = `
+        <a href="feed.html">Feed</a>
+        <a href="post.html">Create Post</a>
+        <a href="profile.html">Profile (@${user.username})</a>
+        <a href="#" id="logoutBtn">Logout</a>
+      `;
+
+      document.getElementById("logoutBtn").addEventListener("click", () => {
+        localStorage.removeItem("user");
+        window.location.href = "login.html";
+      });
+    }
+
+    const postForm = document.getElementById("postForm");
+    const messageDiv = document.getElementById("message");
+
+    postForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const imageInput = document.getElementById("imageInput");
+      const captionInput = document.getElementById("captionInput");
+
+      if (imageInput.files.length === 0) {
+        messageDiv.textContent = "Please select an image file.";
+        messageDiv.style.color = "red";
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("image", imageInput.files[0]);
+
+      try {
+        messageDiv.textContent = "Uploading image...";
+        messageDiv.style.color = "white";
+
+        // Upload image to backend
+        const uploadRes = await fetch("http://localhost:5000/api/upload/image", {
+          method: "POST",
+          body: formData,
+        });
+
+        const uploadData = await uploadRes.json();
+        if (!uploadRes.ok) throw new Error(uploadData.error || "Image upload failed");
+
+        const imageUrl = uploadData.imageUrl;
+
+        messageDiv.textContent = "Creating post...";
+
+        // Create post with uploaded image URL
+        const postRes = await fetch("http://localhost:5000/api/posts", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: user._id,    // use logged-in user ID
+            image: imageUrl,
+            caption: captionInput.value || "",
+          }),
+        });
+
+        const postData = await postRes.json();
+        if (!postRes.ok) throw new Error(postData.error || "Post creation failed");
+
+        messageDiv.textContent = "Post created successfully!";
+        messageDiv.style.color = "limegreen";
+
+        // Reset form
+        postForm.reset();
+
+      } catch (err) {
+        messageDiv.textContent = err.message;
+        messageDiv.style.color = "red";
+      }
+    });
+  </script>
+   
+</body>
+</html>

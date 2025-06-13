@@ -1,0 +1,49 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MySocial - Feed</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div class="logo">MySocial</div>
+    <nav id="navbar">
+      <!-- Nav links inserted by JS -->
+    </nav>
+  </header>
+
+   <!-- <main>
+      <h1>Feed</h1>  
+    <div id="feed" class="feed-container">
+      <! Posts will be loaded here -->
+    </div>
+  </main>   
+
+  <script>
+    const navbar = document.getElementById("navbar");
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    if (!user) {
+      alert("You must be logged in to view this page.");
+      window.location.href = "login.html";
+    } else {
+      navbar.innerHTML = `
+        <a href="feed.html">Feed</a>
+        <a href="post.html">Create Post</a>
+        <a href="profile.html">Profile (@${user.username})</a>
+        <a href="#" id="logoutBtn">Logout</a>
+      `;
+
+      document.getElementById("logoutBtn").addEventListener("click", () => {
+        localStorage.removeItem("user");
+        window.location.href = "login.html";
+      });
+    }
+
+    // TODO: fetch and display posts in #feed here, after your backend is ready
+  </script>
+</body>
+</html>
+

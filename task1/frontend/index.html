@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MyShop - E-commerce</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header>
+    <nav class="navbar">
+      <div class="logo">MyShop</div>
+      <ul class="nav-links">
+        <li><a href="#" data-category="all" class="active" onclick="filterProducts('all')">Shop</a></li>
+        <li><a href="#" data-category="men" onclick="filterProducts('men')">Men</a></li>
+        <li><a href="#" data-category="women" onclick="filterProducts('women')">Women</a></li>
+        <li><a href="#" data-category="kids" onclick="filterProducts('kids')">Kids</a></li>
+      </ul>
+      <div class="nav-icons">
+        <a href="pages/cart.html" class="cart">Cart (<span id="cart-count">0</span>)</a>
+        <a href="pages/login.html" class="login-btn">Login</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="products-container" id="products-container">
+
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2025 MyShop. All rights reserved.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html> 
+

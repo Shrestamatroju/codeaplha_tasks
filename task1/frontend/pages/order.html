@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Order Confirmation - MyShop</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+
+  <header class="navbar">
+    <div class="logo">MyShop</div>
+    <nav>
+      <ul class="nav-links">
+        <li><a href="../index.html">Shop</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="order-page">
+    <div class="order-box">
+      <h2>🎉 Thank You!</h2>
+      <p>Your order has been placed successfully.</p>
+      <p>You’ll receive a confirmation message soon.</p>
+      <a href="../index.html" class="btn">Continue Shopping</a>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2025 MyShop. All rights reserved.
+  </footer>
+   <script src="../script.js">
+    document.getElementById('placeOrderBtn').addEventListener('click', async () => {
+  const user = JSON.parse(localStorage.getItem('user'));
+  if (!user) {
+    alert("Please login first");
+    window.location.href = '../login.html';
+    return;
+  }
+
+  const orderData = {
+    userId: user.id,
+    items: JSON.parse(localStorage.getItem('cart')) || []
+  };
+
+  try {
+    const response = await fetch('http://localhost:5000/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(orderData),
+    });
+
+    if (response.ok) {
+      alert("Order placed successfully!");
+      localStorage.removeItem('cart'); // clear cart after order
+      window.location.href = '../index.html';  // back to shop
+    } else {
+      const err = await response.json();
+      alert("Error placing order: " + err.message);
+    }
+  } catch (error) {
+    alert("Network error: " + error.message);
+  }
+});
+
+   </script>
+
+</body>
+</html>
